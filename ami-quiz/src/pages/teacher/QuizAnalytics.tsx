@@ -220,6 +220,7 @@ const QuizAnalytics: React.FC = () => {
                 value={selectedTimeframe}
                 onChange={(e) => setSelectedTimeframe(e.target.value as any)}
                 className="border border-gray-300 rounded px-3 py-2"
+                aria-label="Quiz Filter"
               >
                 <option value="all">All Time</option>
                 <option value="week">Last Week</option>

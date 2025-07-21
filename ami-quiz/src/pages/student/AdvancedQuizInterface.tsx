@@ -316,23 +316,18 @@ const AdvancedQuizInterface: React.FC = () => {
 
     try {
       // Calculate score
-      let totalScore = 0;
-      let totalPoints = 0;
-
-      quiz.questions.forEach(question => {
-        totalPoints += question.points;
-        const userAnswer = answers[question.id];
-        if (userAnswer && userAnswer.toLowerCase() === question.correctAnswer.toLowerCase()) {
-          totalScore += question.points;
-        }
-      });
+      const totalPoints = quiz?.questions.reduce((sum, q) => sum + q.points, 0) || 0;
+      const score = Object.entries(answers).reduce((sum, [qid, ans]) => {
+        const q = quiz?.questions.find(q => q.id === qid);
+        return sum + (q && q.correctAnswer === ans ? q.points : 0);
+      }, 0);
 
       const timeTaken = quiz.timeLimit * 60 - timeLeft;
 
       // Update session
       await updateDoc(doc(db, 'quizSessions', session.id), {
         isCompleted: true,
-        score: totalScore,
+        score,
         totalPoints,
         timeTaken,
         lastActivity: new Date()
@@ -343,13 +338,16 @@ const AdvancedQuizInterface: React.FC = () => {
         quizId: quiz.id,
         studentId: user!.uid,
         answers,
-        score: totalScore,
+        score,
         totalPoints,
         completedAt: new Date(),
         timeTaken,
         sessionId: session.id
       });
-
+      setSession(prev => prev ? { ...prev, score, totalPoints, isCompleted: true, timeTaken: quiz?.timeLimit || 0 } : null);
+      setShowSubmitConfirm(false);
+      // Show report card summary (score, total, percent, time taken)
+      alert(`Report Card\nScore: ${score}/${totalPoints}\nPercent: ${Math.round((score/totalPoints)*100)}%\nTime Taken: ${quiz?.timeLimit || 0} min`);
       // Navigate to results
       navigate(`/student/quiz/${quiz.id}/review`);
     } catch (error) {

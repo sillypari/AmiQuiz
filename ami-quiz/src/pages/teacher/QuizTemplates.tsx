@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { db } from '../../firebaseConfig';
-import { collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, where } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, where, Timestamp } from 'firebase/firestore';
 
 interface QuizTemplate {
   id: string;
@@ -37,13 +37,10 @@ const QuizTemplates: React.FC = () => {
   const [filterDifficulty, setFilterDifficulty] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    fetchTemplates();
-  }, []);
-
-  const fetchTemplates = async () => {
+  const fetchTemplates = useCallback(async () => {
+    setLoading(true);
     try {
-      const templatesRef = collection(db, 'quizTemplates');
+      const templatesRef = collection(db, 'quiz-templates');
       const publicTemplatesQuery = query(templatesRef, where('isPublic', '==', true));
       const userTemplatesQuery = query(templatesRef, where('createdBy', '==', user!.uid));
       
@@ -55,13 +52,13 @@ const QuizTemplates: React.FC = () => {
       const publicTemplates = publicSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate() || new Date()
+        createdAt: (doc.data().createdAt as Timestamp).toDate()
       })) as QuizTemplate[];
 
       const userTemplates = userSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate() || new Date()
+        createdAt: (doc.data().createdAt as Timestamp).toDate()
       })) as QuizTemplate[];
 
       // Combine and remove duplicates
@@ -78,9 +75,13 @@ const QuizTemplates: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
-  const useTemplate = async (template: QuizTemplate) => {
+  useEffect(() => {
+    fetchTemplates();
+  }, [fetchTemplates]);
+
+  const handleUseTemplate = async (template: QuizTemplate) => {
     try {
       // Create a new quiz from template
       const quizData = {
@@ -188,6 +189,7 @@ const QuizTemplates: React.FC = () => {
                 value={filterSubject}
                 onChange={(e) => setFilterSubject(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                aria-label="Filter by Subject"
               >
                 <option value="">All Subjects</option>
                 {subjects.map(subject => (
@@ -201,6 +203,7 @@ const QuizTemplates: React.FC = () => {
                 value={filterDifficulty}
                 onChange={(e) => setFilterDifficulty(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                aria-label="Filter by Difficulty"
               >
                 <option value="">All Difficulties</option>
                 {difficulties.map(difficulty => (
@@ -278,7 +281,7 @@ const QuizTemplates: React.FC = () => {
 
                   <div className="flex space-x-2">
                     <button
-                      onClick={() => useTemplate(template)}
+                      onClick={() => handleUseTemplate(template)}
                       className="flex-1 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
                     >
                       Use Template
@@ -322,30 +325,24 @@ interface CreateTemplateModalProps {
 const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({ onClose, onTemplateCreated }) => {
   const { user } = useAuth();
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
   const [subject, setSubject] = useState('');
   const [topic, setTopic] = useState('');
-  const [difficulty, setDifficulty] = useState<'Beginner' | 'Intermediate' | 'Advanced'>('Beginner');
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [difficulty, setDifficulty] = useState<QuizTemplate['difficulty']>('Beginner');
+  const [description, setDescription] = useState('');
   const [isPublic, setIsPublic] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [questions, setQuestions] = useState<Question[]>([
+    { id: `q-${Date.now()}`, text: '', type: 'multiple-choice', options: ['', ''], correctAnswer: '', points: 1 }
+  ]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const addQuestion = () => {
-    const newQuestion: Question = {
-      id: Date.now().toString(),
-      text: '',
-      type: 'multiple-choice',
-      options: ['', '', '', ''],
-      correctAnswer: '',
-      points: 1
-    };
-    setQuestions([...questions, newQuestion]);
+    setQuestions([...questions, { id: `q-${Date.now()}`, text: '', type: 'multiple-choice', options: ['', ''], correctAnswer: '', points: 1 }]);
   };
 
-  const updateQuestion = (index: number, field: keyof Question, value: any) => {
-    const updatedQuestions = [...questions];
-    updatedQuestions[index] = { ...updatedQuestions[index], [field]: value };
-    setQuestions(updatedQuestions);
+  const updateQuestion = (index: number, field: keyof Question, value: Question[keyof Question]) => {
+    const newQuestions = [...questions];
+    (newQuestions[index] as any)[field] = value;
+    setQuestions(newQuestions);
   };
 
   const removeQuestion = (index: number) => {
@@ -359,7 +356,7 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({ onClose, onTe
       return;
     }
 
-    setLoading(true);
+    setIsSubmitting(true);
     try {
       const templateData = {
         title,
@@ -380,7 +377,7 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({ onClose, onTe
       console.error('Error creating template:', error);
       alert('Error creating template. Please try again.');
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -410,6 +407,7 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({ onClose, onTe
                   onChange={(e) => setTitle(e.target.value)}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
+                  placeholder="Template Name"
                 />
               </div>
 
@@ -447,8 +445,9 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({ onClose, onTe
                 </label>
                 <select
                   value={difficulty}
-                  onChange={(e) => setDifficulty(e.target.value as any)}
+                  onChange={(e) => setDifficulty(e.target.value as QuizTemplate['difficulty'])}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  aria-label="Difficulty Level"
                 >
                   <option value="Beginner">Beginner</option>
                   <option value="Intermediate">Intermediate</option>
@@ -466,6 +465,7 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({ onClose, onTe
                 onChange={(e) => setDescription(e.target.value)}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 rows={3}
+                placeholder="A brief description of the template's content and purpose."
                 required
               />
             </div>
@@ -518,6 +518,7 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({ onClose, onTe
                         onChange={(e) => updateQuestion(index, 'text', e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         required
+                        placeholder="Enter question text"
                       />
                     </div>
 
@@ -527,8 +528,9 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({ onClose, onTe
                       </label>
                       <select
                         value={question.type}
-                        onChange={(e) => updateQuestion(index, 'type', e.target.value)}
+                        onChange={(e) => updateQuestion(index, 'type', e.target.value as Question['type'])}
                         className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        aria-label="Question Type"
                       >
                         <option value="multiple-choice">Multiple Choice</option>
                         <option value="true-false">True/False</option>
@@ -569,6 +571,7 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({ onClose, onTe
                         onChange={(e) => updateQuestion(index, 'correctAnswer', e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         required
+                        placeholder="Enter correct answer"
                       />
                     </div>
 
@@ -584,6 +587,7 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({ onClose, onTe
                         min="1"
                         max="10"
                         required
+                        placeholder="Points"
                       />
                     </div>
                   </div>
@@ -601,10 +605,10 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({ onClose, onTe
               </button>
               <button
                 type="submit"
-                disabled={loading}
+                disabled={isSubmitting}
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
               >
-                {loading ? 'Creating...' : 'Create Template'}
+                {isSubmitting ? 'Creating...' : 'Create Template'}
               </button>
             </div>
           </form>

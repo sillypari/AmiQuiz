@@ -215,6 +215,7 @@ const CommunityLibrary: React.FC = () => {
                 value={filterSubject}
                 onChange={(e) => setFilterSubject(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                aria-label="Filter by Subject"
               >
                 <option value="">All Subjects</option>
                 {subjects.map((subject) => (
@@ -227,6 +228,7 @@ const CommunityLibrary: React.FC = () => {
                 value={filterDifficulty}
                 onChange={(e) => setFilterDifficulty(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                aria-label="Filter by Difficulty"
               >
                 <option value="">All Difficulties</option>
                 <option value="Beginner">Beginner</option>
@@ -239,6 +241,7 @@ const CommunityLibrary: React.FC = () => {
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
                 className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                aria-label="Sort by"
               >
                 <option value="rating">Sort by Rating</option>
                 <option value="downloads">Sort by Downloads</option>
