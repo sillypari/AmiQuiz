@@ -1,6 +1,51 @@
-# AmiQuiz - Amity University Quiz Management System
+# <img src="https://raw.githubusercontent.com/sillypari/AmiQuiz/main/ami-quiz/public/vite.svg" alt="AmiQuiz Logo" width="48" /> AmiQuiz - Amity University Quiz Management System
 
-A comprehensive, modern quiz management platform designed specifically for Amity University, featuring advanced AI-powered quiz generation, community sharing, and robust analytics.
+<p align="center">
+  <b>Empowering Education Through Technology 🎓✨</b>
+</p>
+
+<p align="center">
+  <a href="https://github.com/sillypari/AmiQuiz/actions"><img src="https://img.shields.io/github/workflow/status/sillypari/AmiQuiz/CI?label=build" alt="Build Status"></a>
+  <a href="https://github.com/sillypari/AmiQuiz/blob/main/LICENSE"><img src="https://img.shields.io/github/license/sillypari/AmiQuiz" alt="License"></a>
+  <a href="https://github.com/sillypari/AmiQuiz/issues"><img src="https://img.shields.io/github/issues/sillypari/AmiQuiz" alt="Issues"></a>
+  <a href="https://github.com/sillypari/AmiQuiz/stargazers"><img src="https://img.shields.io/github/stars/sillypari/AmiQuiz" alt="Stars"></a>
+</p>
+
+---
+
+> **Note:** This project is currently being migrated from Vite + React to Next.js for enhanced SSR, SEO, and scalability. Stay tuned for updates!
+
+---
+
+## 📸 Demo & Screenshots
+
+<!-- Add screenshots or demo GIFs here -->
+<p align="center">
+  <img src="https://placehold.co/800x400?text=Demo+Screenshot+1" alt="Demo Screenshot 1" width="80%" />
+</p>
+
+---
+
+## 📚 Table of Contents
+- [Project Status](#-project-status-fully-implemented)
+- [Key Features](#-key-features)
+- [Technical Architecture](#-technical-architecture)
+- [Database Schema](#-database-schema)
+- [Advanced Features](#-advanced-features)
+- [Getting Started](#-getting-started)
+- [Usage Guide](#-usage-guide)
+- [Configuration](#-configuration)
+- [UI/UX Features](#-uiux-features)
+- [Security Features](#-security-features)
+- [Performance Optimization](#-performance-optimization)
+- [Testing](#-testing)
+- [Deployment](#-deployment)
+- [Analytics & Monitoring](#-analytics--monitoring)
+- [Future Roadmap](#-future-roadmap)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Support](#-support)
+- [Acknowledgments](#-acknowledgments)
 
 ## 🎯 **Project Status: FULLY IMPLEMENTED**
 
@@ -430,8 +475,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🆘 **Support**
 
-- **Documentation**: [Wiki](link-to-wiki)
-- **Issues**: [GitHub Issues](link-to-issues)
+- **Documentation**: [Wiki](https://github.com/sillypari/AmiQuiz/wiki)
+- **Issues**: [GitHub Issues](https://github.com/sillypari/AmiQuiz/issues)
 - **Email**: support@amiquiz.edu
 - **Phone**: +1-800-AMIQUIZ
 
