@@ -1,35 +1,47 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import LoginPage from './pages/auth/LoginPage';
+import RegisterPage from './pages/auth/RegisterPage';
+import RoleDetailsPage from './pages/auth/RoleDetailsPage';
+import StudentDashboard from './pages/student/StudentDashboard';
+import QuizReview from './pages/student/QuizReview';
+import AdvancedQuizInterface from './pages/student/AdvancedQuizInterface';
+import TeacherDashboard from './pages/teacher/TeacherDashboard';
+import QuizAnalytics from './pages/teacher/QuizAnalytics';
+import QuizTemplates from './pages/teacher/QuizTemplates';
+import AIQuizGenerator from './pages/teacher/AIQuizGenerator';
+import CommunityLibrary from './pages/teacher/CommunityLibrary';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import ProtectedRoute from './components/ProtectedRoute';
 
-function App() {
-  const [count, setCount] = useState(0)
-
+const App: React.FC = () => {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <Routes>
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/register/role" element={<RoleDetailsPage />} />
+      
+      {/* Student Routes */}
+      <Route path="/student/dashboard" element={<ProtectedRoute><StudentDashboard /></ProtectedRoute>} />
+      <Route path="/student/quiz/:quizId/take" element={<ProtectedRoute><AdvancedQuizInterface /></ProtectedRoute>} />
+      <Route path="/student/quiz/:quizId/review" element={<ProtectedRoute><QuizReview /></ProtectedRoute>} />
+      
+      {/* Teacher Routes */}
+      <Route path="/teacher/dashboard" element={<ProtectedRoute><TeacherDashboard /></ProtectedRoute>} />
+      <Route path="/teacher/templates" element={<ProtectedRoute><QuizTemplates /></ProtectedRoute>} />
+      <Route path="/teacher/ai-generator" element={<ProtectedRoute><AIQuizGenerator /></ProtectedRoute>} />
+      <Route path="/teacher/community" element={<ProtectedRoute><CommunityLibrary /></ProtectedRoute>} />
+      <Route path="/teacher/quiz/:quizId/edit" element={<ProtectedRoute><div>Quiz Edit Page (Coming Soon)</div></ProtectedRoute>} />
+      <Route path="/teacher/quiz/:quizId/analytics" element={<ProtectedRoute><QuizAnalytics /></ProtectedRoute>} />
+      
+      {/* Admin Routes */}
+      <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+      
+      {/* Catch all route */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
+  );
+};
 
-export default App
+export default App;

@@ -1,12 +1,13 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { auth } from '../../ami-quiz/src/firebaseConfig';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { auth } from '../firebaseConfig';
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
   signOut,
-  User,
+  type User,
 } from 'firebase/auth';
 
 interface AuthContextProps {
@@ -14,6 +15,8 @@ interface AuthContextProps {
   loading: boolean;
   loginWithEmail: (email: string, password: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
+  registerWithEmail: (email: string, password: string) => Promise<void>;
+  registerWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -50,8 +53,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(false);
   };
 
+  const registerWithEmail = async (email: string, password: string) => {
+    setLoading(true);
+    await createUserWithEmailAndPassword(auth, email, password);
+    setLoading(false);
+  };
+
+  const registerWithGoogle = async () => {
+    setLoading(true);
+    const provider = new GoogleAuthProvider();
+    await signInWithPopup(auth, provider);
+    setLoading(false);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, loginWithEmail, loginWithGoogle, logout }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      loading, 
+      loginWithEmail, 
+      loginWithGoogle, 
+      registerWithEmail,
+      registerWithGoogle,
+      logout 
+    }}>
       {children}
     </AuthContext.Provider>
   );
