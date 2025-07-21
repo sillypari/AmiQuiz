@@ -13,14 +13,17 @@ import AIQuizGenerator from './pages/teacher/AIQuizGenerator';
 import CommunityLibrary from './pages/teacher/CommunityLibrary';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
+import IndexPage from './pages/IndexPage';
+import RoleSelectPage from './pages/auth/RoleSelectPage';
 
 const App: React.FC = () => {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/" element={<IndexPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/register/role" element={<RoleDetailsPage />} />
+      <Route path="/select-role" element={<RoleSelectPage />} />
       
       {/* Student Routes */}
       <Route path="/student/dashboard" element={<ProtectedRoute><StudentDashboard /></ProtectedRoute>} />
