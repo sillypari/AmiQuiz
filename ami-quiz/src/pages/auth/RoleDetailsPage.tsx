@@ -1,17 +1,36 @@
 import React, { useState } from 'react';
 import AcademicDropdowns from '../../components/AcademicDropdowns';
+import { useAuth } from '../../hooks/useAuth';
+import { db } from '../../firebaseConfig';
+import { doc, setDoc } from 'firebase/firestore';
 
 const RoleDetailsPage: React.FC = () => {
+  const { user } = useAuth();
   const [role, setRole] = useState('');
   const [academic, setAcademic] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock Firestore save
-    setSubmitted(true);
-    // Use academic state (simulate save)
-    console.log('Academic profile:', academic);
+    if (!user || !user.uid) {
+      alert('You must be logged in to save your profile.');
+      return;
+    }
+    try {
+      setSaving(true);
+      await setDoc(doc(db, 'users', user.uid), {
+        role,
+        academic,
+        updatedAt: new Date(),
+      }, { merge: true });
+      setSubmitted(true);
+    } catch (err) {
+      console.error('Error saving profile', err);
+      alert('Failed to save profile. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -40,7 +59,9 @@ const RoleDetailsPage: React.FC = () => {
             <AcademicDropdowns onChange={setAcademic} />
           </div>
         )}
-        <button type="submit" className="btn btn-primary w-full mt-4">Submit</button>
+        <button type="submit" className="btn btn-primary w-full mt-4" disabled={saving}>
+          {saving ? 'Saving...' : 'Submit'}
+        </button>
         {submitted && (
           <div className="mt-4 p-4 bg-green-100 text-green-800 rounded">Profile saved! (Mock): {JSON.stringify(academic)}</div>
         )}
